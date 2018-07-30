@@ -258,7 +258,7 @@ function readSingleFile(e) {
     }
 
     // checks if group chat
-    if (ca.userCount() > 2) {
+    if (ca.userCount() > 0) {
       // GROUP CHAT ----------------------------------------------------------------------
 
       // TODO: What to do when this is a normal chat misidentified as a group chat?

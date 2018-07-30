@@ -1,11 +1,47 @@
-![logo](http://alo724ayyildizelektrik.com/test1/logotype2.png)
+![logo](https://raw.githubusercontent.com/barry-luijten/ChatAnalyzer/master/img/logo/logotype2.png)
 
-A JavaScript application to analyze WhatsApp chat history locally in your browser.
-* Forked  from the original ChatAnalyzer by Mowolf https://github.com/mowolf/ChatAnalyzer.git
+A JavaScript application to analyze WhatsApp chat dump locally in your browser.
+* Forked  from the original ChatAnalyzer by Moritz Wolf https://github.com/mowolf/ChatAnalyzer.git
 * Most of the JS code has been rewritten to accommodate easier expansion with new stats
 
+# Features
+* Displays a table with the following statistics per user 
+  * Total number of messages sent
+  * Total number of words
+  * Total number of emoji's sent
+  * Total number of images sent (iOS only)
+  * Total number of video's sent (iOS only)
+  * Total number of GIF's sent (iOS only)
+  * Total number of links sent
+  * Total number of audio messages sent (iOS only)
+  * Total number of documents sent (iOS only)
+  * Total number of contact cards sent (iOS only)
+  * Total number of locations sent
+  * Top 3 words used
+  * Top 5 emoji's used
+  * Average number of words per message used
+  * Total number of unique words used (vacabulary)
+  * The top three of each category are indicated by a medal emoji (gold, silver, bronze)
+* Shows a spider diagram of the number of messages sent per user per day of the week (Sun-Sat)
+* Shows a time based graph with the total number of messages sent per day
+
+# Planned features
+* Replace legacy code for generating time based graph
+* Android dump support with auto-detection
+* Filter out commonly used words
+* Auto-detect timestamp format
+* Customize analyzed date range from UI
+* Add statistics for totals
+* Modify UI layout
+* Create headless version to be used on self-hosted server
+
+# Known errors
+* Ranks with equal scores are sorted randomly
+* Ranks with 0-scores are still ranked
+
 # Limitations
-* Currently, only iOS dumps are supported, but I'm working on Android support. 
+* Currently, only iOS dumps are supported.
+* One-on-one chats are treated the same as group chats (as opposed to the original ChatAnalyzer)
 
 # Usage
 
@@ -149,8 +185,4 @@ Head over to [planned features](https://github.com/barry-luijten/ChatAnalyzer/la
 
 ## Wanna help making this better?
 
-Cheers! You are very welcome! Just submit a pull request. The goal of this tool is to automize the parsing as much as possible.
-
-### Add your language identifier for audio/video/pictures
-
-Please see the header of `analyze.js`. There you can add your identifiers.
+Cheers! You are very welcome! Just submit a pull request.
