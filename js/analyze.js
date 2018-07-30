@@ -1,18 +1,185 @@
 /// ----------------------------- \ GENERAL Config START /----------------------
+// Define global variable
+var ca = {};
 
 // If you notice that your picture cont = 0 please add the identifier of your language in
 // lowercase and adding a "_" to the start e.g. "<Media" -> "_<media"
 // ATTENTION: These strings might have some weird invisible space character between "<" and "media" !!!!
 // ATTENTION: BE SURE TO COPY AND PASTE FROM YOUR CHAT LOG !!!!
-var str4Pic = ["_<‎bild","_<‎media", "_<‎picture", "<‎attached>"];
+var str4Pic = ["_<‎bild","_<‎media", "_<‎picture", "<‎attached>", "_‎image"];
+var str4Video = ["_‎video"];
+//Init ca
+ca.dtFormat = "DD-MM-YYYY HH:mm:ss";
+ca.maxDays = 7;
+//Regular expressions
+ca.re = {};
+ca.re.image = new RegExp(/\u200eimage omitted/);
+ca.re.document = new RegExp(/\u200edocument omitted/);
+ca.re.gif = new RegExp(/\u200egif omitted/);
+ca.re.video = new RegExp(/\u200evideo omitted/);
+ca.re.audio = new RegExp(/\u200eaudio omitted/);
+ca.re.contact = new RegExp(/\u200econtact card omitted/);
+ca.re.location = new RegExp(/\u200elocation:/);
+ca.re.link = new RegExp(/(https?:\/\/[^\s]*)/);
+ca.re.words = new RegExp(/[\b\s:;"'~`!@#$%^&*()_\-+=\[\]{}|\\<,.>?/°]/);
+ca.re.digits = new RegExp(/\D/);
+ca.re.message = new RegExp(/\[(.*),\s(.*)\]\s((.*?):\s(.*)|\u200e(.*))/);
+// https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
+ca.re.emoji = new RegExp(/\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])?|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F/g);
+ca.emojis = [];
+ca.events = [];
+ca.messages = [];
+ca.words = [];
+ca.users = {};
+ca.userCount = function() {
+  var c = 0;
+  for (var u in ca.users){
+    c++;
+  }
+  return c;
+}
+ca.calculateRanks = function() {
+  ca.ranks = {};
+  var rankings = ['messages','wordCount','wordCountUnique','wordsPerMessage','emojiCount','links','images','documents','gifs','videos','audios','contacts','locations'];
+  for (var r of rankings.values()) {
+    var rank = {};
+    rank.name = r;
+    rank.value = 0;
+    rank.leader = '';
+    rank.scores = [];
+    for (var u in ca.users){
+      var score = {};
+      score.user = u;
+      if (typeof ca.users[u][r] == "function") {
+        score.value = ca.users[u][r]();
+      } else {
+        score.value = ca.users[u][r];
+      }
+      rank.scores.push(score);
+    }
+    rank.scores.sort(function (a, b){
+      return b.value - a.value;
+    });
+    ca.ranks[r] = rank;
+  }
+}
+ca.getRankEmoji = function(rank){
+  switch (rank) {
+    case 1: return '🥇';
+    case 2: return '🥈';
+    case 3: return '🥉';
+    default: return '';
+  }
+}
+ca.messagesPerWeekday = [];
+for (i = 0; i < 7; i++) {
+  ca.messagesPerWeekday[i] = 0;
+}
 
+// Define User class
+class User {
+  constructor(name) {
+    this.name = name;
+    this.messages = 0;
+    this.words = {};
+    this.links = 0;
+    this.images = 0;
+    this.documents = 0;
+    this.gifs = 0;
+    this.videos = 0;
+    this.audios = 0;
+    this.contacts = 0;
+    this.locations = 0;
+    this.emojis = {};
+    this.messagesPerWeekday = [];
+    for (i = 0; i < 7; i++) {
+      this.messagesPerWeekday[i] = 0;
+    }
+  }
+  wordCount() {
+    var c = 0
+    for (var w in this.words) {
+      c += this.words[w];
+    }
+    return c;
+  }
+  wordCountUnique() {
+    var c = 0
+    for (var w in this.words) {
+      c++;
+    }
+    return c;
+  }
+  wordsByUsage(max) {
+    var a = [];
+    var r = [];
+    var i = 0;
+    for (var w in this.words) {
+      var word = {};
+      word.name = w;
+      word.count = this.words[w];
+      a.push(word);
+    }
+    a.sort(function(x,y) {
+      return y.count - x.count;
+    });
+    for (var wNr in a) {
+      var word = a[wNr];
+      r.push(word.name + "(" + word.count + ")");
+      i++;
+      if (i == max) break;
+    }
+    return r;
+  }
+  wordsPerMessage() {
+    return (this.wordCount() / this.messages).toFixed(1);
+  }
+  emojisByUsage(max) {
+    var a = [];
+    var r = [];
+    var i = 0;
+    for (var e in this.emojis) {
+      var emoji= {};
+      emoji.name = e;
+      emoji.count = this.emojis[e];
+      a.push(emoji);
+    }
+    a.sort(function(x,y) {
+      return y.count - x.count;
+    });
+    for (var eNr in a) {
+      var emoji = a[eNr];
+      r.push(emoji.name + "(" + emoji.count + ")");
+      i++;
+      if (i == max) break;
+    }
+    return r;
+  }
+  emojiCount() {
+    var c = 0
+    for (var w in this.emojis) {
+      c += this.emojis[w];
+    }
+    return c;
+  }
+  rank(ranking) {
+    if (!ca.ranks) ca.calculateRanks();
+    if (!ca.ranks[ranking]) return undefined;
+    var username = this.name;
+    var index = ca.ranks[ranking].scores.findIndex(function(score){
+      return score.user == username;
+    })
+    //Ranking is 1-based, index is zero-based
+    return index + 1;
+  }
+}
 // If you notice that your audio cont = 0 please add the identifier of your language in
 // ATTENTION: BE SURE TO COPY AND PASTE FROM YOUR CHAT LOG !!!!
-var str4Audio = ["_<‎audio"];
+var str4Audio = ["_<‎audio","_‎audio"];
 
 // If you notice words that are not part of your chat (i.g. identifiers) of your language in
 // ATTENTION: PLEASE BE SURE TO COPY AND PASTE FROM YOUR CHAT LOG !!!!
-var unwantedWords = ["_","_weggelassen>", "_ommited>", "omesso>"];
+var unwantedWords = ["_","_weggelassen>", "_ommited>", "omesso>", "_omitted"];
 
 /// ----------------------------- \ GENERAL Config END /--------------------------------
 
@@ -67,6 +234,7 @@ function readSingleFile(e) {
 
     var contents = e.target.result;
     // get data in right format
+    parseContent(contents);
     var structArray = createStruct(contents);
     var userStruct = filterUsers(structArray);
 
@@ -84,9 +252,13 @@ function readSingleFile(e) {
     backgroundColorArray = ["rgba(20, 168, 204, 0.2)", "rgba(255, 72, 64, 0.2)"];
     colorArray = ["rgb(20, 168, 204)", "rgb(255, 72, 64)"];
 
+    // create COLORS
+    for (var u in ca.users) {
+      colorArray.push(getRandomColor());
+    }
 
     // checks if group chat
-    if (userStruct.length > 2) {
+    if (ca.userCount() > 2) {
       // GROUP CHAT ----------------------------------------------------------------------
 
       // TODO: What to do when this is a normal chat misidentified as a group chat?
@@ -101,13 +273,9 @@ function readSingleFile(e) {
       erG.style.display = "block";
       document.getElementById("group").style.display = "block";
 
-      // create COLORS
-      for (var i = 0; i < userStruct.length; i++) {
-        colorArray.push(getRandomColor());
-      }
 
       // analyze
-      displayGroup(userStruct);
+      displayGroupStats(userStruct);
     } else {
       // NORMAL CHAT ----------------------------------------------------------------------
       displayChat(userStruct);
@@ -159,6 +327,7 @@ function displayChat(content) {
     // TODO:make critical variables global! and be sure to save tmem and not override with new persons stat
     totalWords = wordsPerMessage[i][1]
     var sentPicsCount = words.sentPicsCount;
+    var sentVideoCount = words.sentVideoCount;
     var sentAudioCount = words.sentAudioCount;
 
     // HTML CONSTRUCTION ------------------------------------
@@ -181,6 +350,7 @@ function displayChat(content) {
                     "<p> Messages sent: <b>" + messagesCount[i] + "</b></p>" +
                     "<p> Words per Message: <b>" + wordsPerMessage[i][0] + "</b></p>" +
                     "<p> Pictures sent: <b>" + sentPicsCount + "</b></p>" +
+                    "<p> Videos sent: <b>" + sentVideoCount + "</b></p>" +
                     "<p> Audio sent:<b>" + sentAudioCount + "</b></p>";
     document.getElementById('users').appendChild(div);
 
@@ -369,62 +539,43 @@ function displayChat(content) {
 // # ------------------------------------------------------------------------- #
 // GROUPS ----------------------------------------------------------------------
 // NOTE: this is the function that gets executed on group chats
-function displayGroup(content) {
 
-  var wordsPerMessage = [];
-  var messagesCount = [];
+function displayGroupStats(content) {
 
   // TODO: figure out the group name!
 
   // personal STATS
-  for (var i = 0; i < content.length; i++) {
-    // message Count ----------------------------------------
-    messagesCount[i] = content[i].message.length;
-
-    // Words per message ------------------------------------
-    // returns [avergeWordsPerMessage,tolalWords];
-    wordsPerMessage[i] = calcWordsPerMessage(content[i].message);
-
-    // Most used words --------------------------------------
-    var words = getMostUsedWords(content[i].message);
-    wordsByUsage[i] = words.mostUsed;
-    var sentPicsCount = words.sentPicsCount;
-    var sentAudioCount = words.sentAudioCount;
-
+  for (var u in ca.users) {
+    var user = ca.users[u];
     // HTML
 
     // display table
     document.getElementById("groupTable").style.display = "block";
 
-    // set max
-    if (wordsByUsage[i].length > 3) {
-      var max = 3;
-    } else {
-      var max = wordsByUsage[i].length;
-    }
-    var mostUsedHTML ="";
-    for (var j = 0; j < max; j++) {
-      mostUsedHTML = mostUsedHTML + wordsByUsage[i][j][0].substring(1) +" - "; //+ Math.round(mostUsed[j][1]/wordsPerMessage[i][1]*1000)/10 + "% | ";
-    }
 
     // create rows
     var tableRows = document.createElement('tr');
-
-    if (sentPicsCount == 0) {
-      sentPicsCount = "";
-    }
-    if (sentAudioCount == 0) {
-      sentAudioCount = "";
-    }
-
+    var topWords = user.wordsByUsage(3).join(' - ');
+    var topEmojis = user.emojisByUsage(5).join(' - ');
+     
     tableRows.innerHTML = //"<th scope='row'>"+"<h4 data-letters='" + content[i].name.match(/\b\w/g).join('') + "'></h4>"+"</th>" +
-                          "<th scope='row'>"+"<h4 data-letters='" + content[i].name[0] + "'></h4>"+"</th>" +
-                          "<td>"+content[i].name+"</td>" +
-                          "<td>"+messagesCount[i]+"</td>" +
-                          "<td>"+wordsPerMessage[i][0]+"</td>"+
-                          "<td>"+sentPicsCount+"</td>" +
-                          "<td>"+sentAudioCount+"</td>" +
-                          "<td>"+mostUsedHTML+"</td>";
+                          "<th scope='row'>"+"<h4 data-letters='" + user.name.substring(0,1) + "'></h4>"+"</th>" +
+                          "<td>"+user.name+"</td>" +
+                          "<td>"+user.messages + ca.getRankEmoji(user.rank('messages')) + "</td>" +
+                          "<td>"+user.wordCount() + ca.getRankEmoji(user.rank('wordCount')) +"</td>"+
+                          "<td>"+user.emojiCount() + ca.getRankEmoji(user.rank('emojiCount')) +"</td>"+
+                          "<td>"+user.images + ca.getRankEmoji(user.rank('images')) + "</td>" +
+                          "<td>"+user.videos + ca.getRankEmoji(user.rank('videos')) + "</td>" +
+                          "<td>"+user.gifs + ca.getRankEmoji(user.rank('gifs')) + "</td>" +
+                          "<td>"+user.links + ca.getRankEmoji(user.rank('links')) + "</td>" +
+                          "<td>"+user.audios + ca.getRankEmoji(user.rank('audios')) + "</td>" +
+                          "<td>"+user.documents + ca.getRankEmoji(user.rank('documents')) + "</td>" +
+                          "<td>"+user.contacts + ca.getRankEmoji(user.rank('contacts')) + "</td>" +
+                          "<td>"+user.locations + ca.getRankEmoji(user.rank('locations')) + "</td>" +
+                          "<td>"+topWords+"</td>" + 
+                          "<td>"+topEmojis+"</td>" +
+                          "<td>"+user.wordsPerMessage() + ca.getRankEmoji(user.rank('wordsPerMessage')) + "</td>" +
+                          "<td>"+user.wordCountUnique() + ca.getRankEmoji(user.rank('wordCountUnique')) + "</td>";
 
     document.getElementById('groupTableRows').appendChild(tableRows);
 
@@ -435,13 +586,143 @@ function displayGroup(content) {
   sortTable(1);
 
   // Day Radar
-  createDayRadar(content);
+  createDayRadar();
   // Chronological Graph
   createChonologicalGraph(content);
 }
 
 // # ------------------------------------------------------------------------- #
 // FUNCTIONS -------------------------------------------------------------------
+
+function parseContent(content) {
+  //Build message array from content
+  ca.messages = [];
+  var contentLines = content.split('\r\n');
+  var m = {};
+  for (var lineNr in contentLines) {
+    var line = contentLines[lineNr];
+    var match = ca.re.message.exec(line);
+    if (match) {
+      m = {};
+      var t = moment(match[1] + ' ' + match[2], ca.dtFormat);
+      m.timestamp = t.toJSON();
+      if (ca.maxDays > 0 && moment.duration(moment().diff(t)).asDays() > ca.maxDays) continue;
+      ca.messagesPerWeekday[t.day()]++;
+      m.date = match[1];
+      m.time = match[2];
+      if (match[6]) {
+        m.event = match[6];
+      } else {
+        m.user = match[4];
+        var s = match[5].toLowerCase();
+        if (ca.re.image.test(s)) m.attachment = 'image';
+        if (ca.re.document.test(s)) m.attachment = 'document';
+        if (ca.re.gif.test(s)) m.attachment = 'gif';
+        if (ca.re.video.test(s)) m.attachment = 'video';
+        if (ca.re.audio.test(s)) m.attachment = 'audio';
+        if (ca.re.contact.test(s)) m.attachment = 'contact';
+        if (ca.re.location.test(s)) m.attachment = 'location';
+        if (! m.attachment) m.message = match[5];
+      }
+      ca.messages.push(m);
+    } else {
+      //Append multiline messages
+      if (m.message) m.message += '\n';
+      m.message += line;
+    }
+  }
+  //Parse all messages
+  for (var mNr in ca.messages) {
+    var m = ca.messages[mNr];
+    if (m.message) {
+      //Filter links
+      m.links = [];
+      var linkMatch = ca.re.link.exec(m.message);
+      while (linkMatch != null) {
+        m.links.push(linkMatch[1]);
+        //Strip link from message
+        m.message = m.message.substring(0,linkMatch.index) + m.message.substring(linkMatch.index + linkMatch[1].length);
+        linkMatch = ca.re.link.exec(m.message);
+      }
+      //Handle words
+      m.words = m.message.toLowerCase().split(ca.re.words);
+      //Strip emoji's from words
+      for (var wNr in m.words) {
+        m.words[wNr] = m.words[wNr].replace(ca.re.emoji,'');
+      }
+      //Remove empty words
+      m.words = m.words.filter(function (w) {
+        return (w != '' && ca.re.digits.test(w));
+      });
+      //Add words to global index
+      for (var wNr in m.words) {
+        var w = m.words[wNr];
+        if (ca.words[w]) {
+          ca.words[w]++;
+        } else {
+          ca.words[w] = 1;
+        }
+      }
+      //Filter emoji's
+      m.emojis = [];
+      var emojiMatch;
+      while (emojiMatch = ca.re.emoji.exec(m.message)) {
+        var e = emojiMatch[0];
+        if (m.emojis[e]) {
+          m.emojis[e] ++;
+        } else {
+          m.emojis[e] = 1;
+        }
+        //Add emoji's to global index
+        if (ca.emojis[e]) {
+          ca.emojis[e] ++;
+        } else {
+          ca.emojis[e] = 1;
+        }
+      }
+    }
+    //Update user
+    if (m.user) {
+      //Add users to global index
+      if (!ca.users[m.user]) {
+        var user = new User(m.user);
+        ca.users[m.user] = user;
+      } else {
+        user = ca.users[m.user];
+      }
+      user.messages++;
+      if (m.links) user.links += m.links.length;
+      if (m.attachment) user[m.attachment + 's']++;
+      if (m.words) {
+        for (var wNr in m.words) {
+          var w = m.words[wNr];
+          if (user.words[w]) {
+            user.words[w]++;
+          } else {
+            user.words[w] = 1;
+          }
+        }
+      }
+      if (m.emojis) {
+        for (var e in m.emojis) {
+          if (user.emojis[e]) {
+            user.emojis[e] += m.emojis[e];
+          } else {
+            user.emojis[e] = m.emojis[e];
+          }
+        }
+      }
+      //Update weekday stats
+      var t = moment(m.timestamp);
+      user.messagesPerWeekday[t.day()]++;
+    }
+    if (m.event) {
+      ca.events.push(m);
+    }
+    //Store updated message
+    ca.messages[mNr] = m;
+  }
+}
 
 // struct factory
 // https://stackoverflow.com/questions/502366/structs-in-javascript
@@ -465,6 +746,7 @@ function createStruct(content) {
    // https://www.debuggex.com/r/VGwUUxtq7tvF2rJB
    // This regex is used to find the start index of every message (including special messages)
    var re = new RegExp("(\\[?)((\\d{1,4}(\\-|\\/|\\.){1}){2}\\d{2,4})((\\s.{1,3}\\s|\\s)|,\\s|\\.\\s){1}(((\\d{1,2}(\\:|.))\\d{2}((:|.)\\d{2})?)(\\s(a|p)?m|\\s(A|P)?M|\\s(a|p)?\\.(\\s)?\\m.)?)(\\]\\s|\\s\\-\\s|\\:)","g");
+   var reFull = new RegExp('(\[?)((\d{1,4}(\-|\/|\.){1}){2}\d{2,4})((\s.{1,3}\s|\s)|,\s|\.\s){1}(((\d{1,2}\:)\d{2}(:\d{2})?)(\s(a|p)?m|\s(A|P)?M|\s(a|p)?\.(\s)?\m.)?)(\]\s|\s\-\s|\:)((.*:\s)(.*)|\u200e.*)','g');
    // regex to find ending of name
    // var reD = new RegExp("([:-])");
    var reD = new RegExp("(:|-)");
@@ -729,6 +1011,8 @@ function getMostUsedWords(messages) {
   var sentAudioIndex = -1;
   var sentAudioCount = 0;
   var sentPicsCount = 0;
+  var sentVideoIndex = -1;
+  var sentVideoCount = 0;
   // create &sort most Used array
   var mostUsed = [["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],
                     ["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],["",0],
@@ -761,6 +1045,19 @@ function getMostUsedWords(messages) {
   }
   // remove it from the array
   mostUsed.splice(sentPicsIndex, 1);
+
+  // evaluate how many videos were sent
+  for (var j = 0; j < mostUsed.length; j++) {
+    for (var k = 0; k < str4Video.length; k++) {
+      if (mostUsed[j][0] == str4Video[k]) {
+        sentVideoIndex = j;
+        sentVideoCount = mostUsed[j][1];
+        break;
+      }
+    }
+  }
+  // remove it from the array
+  mostUsed.splice(sentVideoIndex, 1);
 
   // --  evaluate how many audio files were sent
   for (var j = 0; j < mostUsed.length; j++) {
@@ -795,6 +1092,7 @@ function getMostUsedWords(messages) {
 
   return { mostUsed: mostUsed,
           sentPicsCount: sentPicsCount,
+          sentVideoCount: sentVideoCount,
           sentAudioCount: sentAudioCount
           };
 }
@@ -927,57 +1225,46 @@ function removeStopwords(lan) {
 // TABLES ----------------------------------------------------------------------
 
 // Day Radar
-function createDayRadar(content) {
-  var dayCount = [0,0,0,0,0,0,0];
-  var data = [];
-
-
-  for (var i = 0; i < content.length; i++) {
-    var temp = getMessagesPerDay(content[i].date);
-
-    if (content.length > 2) {
-      // in total
-      for (var j = 0; j < temp.length; j++) {
-        dayCount[j] += temp[j];
-      }
-
-    } else {
-      // per indivduum
-      // TODO: Add switch button
-      data.push({
-       label:content[i].name,
-       data:temp,
-       fill:true,
-       backgroundColor: backgroundColorArray[i],
-       borderColor: colorArray[i],
-       pointBackgroundColor:colorArray[i],
-       pointBorderColor:"#fff",
-       pointHoverBackgroundColor:"#fff",
-       pointHoverBorderColor: colorArray[i]
-     })
-    }
+function createDayRadar() {
+  var data = {labels: [], datasets: []};
+  for (var d in ca.messagesPerWeekday) {
+    data.labels.push(moment().day(d).format('dddd'));
   }
 
-  if (content.length > 2) {
-    data.push({
-     label:"Total Messages",
-     data:dayCount,
-     fill:true,
-     backgroundColor: backgroundColorArray[0],
-     borderColor: colorArray[0],
-     pointBackgroundColor:colorArray[0],
-     pointBorderColor:"#fff",
-     pointHoverBackgroundColor:"#fff",
-     pointHoverBorderColor: colorArray[0]
-     })
+  var i = 0;
+  for (i = 0;i < ca.ranks["messages"].scores.length && i < 10;i++) {
+    var r = ca.ranks["messages"].scores[i];
+    var u = ca.users[r.user];
+    data.datasets.push({
+      label: u.name,
+      data: u.messagesPerWeekday,
+      fill:true,
+      backgroundColor: backgroundColorArray[i],
+      borderColor: colorArray[i],
+      pointBackgroundColor:colorArray[i],
+      pointBorderColor:"#fff",
+      pointHoverBackgroundColor:"#fff",
+      pointHoverBorderColor: colorArray[i]
+    })
   }
+  //Add total messages dataset
+  data.datasets.push({
+    label: "Total number of messages",
+    data: ca.messagesPerWeekday,
+    fill:true,
+    backgroundColor: backgroundColorArray[0],
+    borderColor: colorArray[0],
+    pointBackgroundColor:colorArray[0],
+    pointBorderColor:"#fff",
+    pointHoverBackgroundColor:"#fff",
+    pointHoverBorderColor: colorArray[0]
+  });
 
   new Chart(
         document.getElementById("dayRadar"),
         {
         type:"radar",
-        data:{labels:[["Sunday", ""],"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-        datasets: data},
+        data: data,
         options:{
             elements:{
               line:{
