@@ -1,6 +1,5 @@
 /// ----------------------------- \ GENERAL Config START /----------------------
 // Define global variable
-var ca = {};
 
 // If you notice that your picture cont = 0 please add the identifier of your language in
 // lowercase and adding a "_" to the start e.g. "<Media" -> "_<media"
@@ -9,8 +8,13 @@ var ca = {};
 var str4Pic = ["_<‎bild","_<‎media", "_<‎picture", "<‎attached>", "_‎image"];
 var str4Video = ["_‎video"];
 //Init ca
+var ca = {};
+
+//Customizable settings
 ca.dtFormat = "DD-MM-YYYY HH:mm:ss";
-ca.maxDays = 7;
+ca.maxDays = 30;
+ca.stopwordLanguages = ["nl","en"];
+
 //Regular expressions
 ca.re = {};
 ca.re.image = new RegExp(/\u200eimage omitted/);
@@ -60,6 +64,15 @@ ca.calculateRanks = function() {
     rank.scores.sort(function (a, b){
       return b.value - a.value;
     });
+    // Assign rankings per score
+    var ranking = 1;
+    for (i in rank.scores) {
+      if (i > 0 && (rank.scores[i].value < rank.scores[i - 1].value)) {
+        ranking++;
+      }
+      if (rank.scores[i].value == 0) ranking = 0;
+      rank.scores[i].ranking = ranking;
+    }
     ca.ranks[r] = rank;
   }
 }
@@ -76,12 +89,22 @@ for (i = 0; i < 7; i++) {
   ca.messagesPerWeekday[i] = 0;
 }
 
+//ca stopwords
+ca.stopwords = [];
+for (let l of ca.stopwordLanguages) {
+  ca.stopwords = ca.stopwords.concat(stopwords[l]);
+}
+ca.isStopword = function(w) {
+  return ca.stopwords.findIndex(function(el){
+    return el == w;
+  }) !== -1
+}
 // Define User class
 class User {
   constructor(name) {
     this.name = name;
     this.messages = 0;
-    this.words = {};
+    this.words = [];
     this.links = 0;
     this.images = 0;
     this.documents = 0;
@@ -96,43 +119,41 @@ class User {
       this.messagesPerWeekday[i] = 0;
     }
   }
-  wordCount() {
+  getWord(w) {
+    return this.words.find(function(word) {
+      return word.name === w;
+    });
+  }
+  wordCount(includeStopwords = true) {
     var c = 0
-    for (var w in this.words) {
-      c += this.words[w];
+    for (var word of this.words) {
+      if (!includeStopwords && word.isStopword) continue;
+      c += word.count;
     }
     return c;
   }
-  wordCountUnique() {
+  wordCountUnique(includeStopwords = true) {
+    if (includeStopwords) return this.words.length;
     var c = 0
-    for (var w in this.words) {
-      c++;
+    for (var word of this.words) {
+      if (!word.isStopword) c++;
     }
     return c;
   }
-  wordsByUsage(max) {
-    var a = [];
+  wordsByUsage(max, includeStopwords = true) {
     var r = [];
-    var i = 0;
-    for (var w in this.words) {
-      var word = {};
-      word.name = w;
-      word.count = this.words[w];
-      a.push(word);
-    }
-    a.sort(function(x,y) {
+    this.words.sort(function(x,y) {
       return y.count - x.count;
     });
-    for (var wNr in a) {
-      var word = a[wNr];
+    for (let word of this.words) {
+      if (!includeStopwords && word.isStopword) continue;
       r.push(word.name + "(" + word.count + ")");
-      i++;
-      if (i == max) break;
+      if (r.length == max) break;
     }
     return r;
   }
   wordsPerMessage() {
-    return (this.wordCount() / this.messages).toFixed(1);
+    return (this.wordCount() / this.messages);
   }
   emojisByUsage(max) {
     var a = [];
@@ -169,8 +190,7 @@ class User {
     var index = ca.ranks[ranking].scores.findIndex(function(score){
       return score.user == username;
     })
-    //Ranking is 1-based, index is zero-based
-    return index + 1;
+    return ca.ranks[ranking].scores[index].ranking;
   }
 }
 // If you notice that your audio cont = 0 please add the identifier of your language in
@@ -555,7 +575,7 @@ function displayGroupStats(content) {
 
     // create rows
     var tableRows = document.createElement('tr');
-    var topWords = user.wordsByUsage(3).join(' - ');
+    var topWords = user.wordsByUsage(3,false).join(' - ');
     var topEmojis = user.emojisByUsage(5).join(' - ');
      
     tableRows.innerHTML = //"<th scope='row'>"+"<h4 data-letters='" + content[i].name.match(/\b\w/g).join('') + "'></h4>"+"</th>" +
@@ -574,7 +594,7 @@ function displayGroupStats(content) {
                           "<td>"+user.locations + ca.getRankEmoji(user.rank('locations')) + "</td>" +
                           "<td>"+topWords+"</td>" + 
                           "<td>"+topEmojis+"</td>" +
-                          "<td>"+user.wordsPerMessage() + ca.getRankEmoji(user.rank('wordsPerMessage')) + "</td>" +
+                          "<td>"+user.wordsPerMessage().toFixed(1) + ca.getRankEmoji(user.rank('wordsPerMessage')) + "</td>" +
                           "<td>"+user.wordCountUnique() + ca.getRankEmoji(user.rank('wordCountUnique')) + "</td>";
 
     document.getElementById('groupTableRows').appendChild(tableRows);
@@ -606,7 +626,6 @@ function parseContent(content) {
       m = {};
       var t = moment(match[1] + ' ' + match[2], ca.dtFormat);
       m.timestamp = t.toJSON();
-      if (ca.maxDays > 0 && moment.duration(moment().diff(t)).asDays() > ca.maxDays) continue;
       ca.messagesPerWeekday[t.day()]++;
       m.date = match[1];
       m.time = match[2];
@@ -631,9 +650,14 @@ function parseContent(content) {
       m.message += line;
     }
   }
+  //Determine last message timestamp
+
+  var last_t = moment(ca.messages[ca.messages.length - 1].timestamp);
   //Parse all messages
   for (var mNr in ca.messages) {
     var m = ca.messages[mNr];
+    var t = moment(m.timestamp);
+    if (ca.maxDays > 0 && moment.duration(last_t.diff(t)).asDays() > ca.maxDays) continue;
     if (m.message) {
       //Filter links
       m.links = [];
@@ -655,8 +679,7 @@ function parseContent(content) {
         return (w != '' && ca.re.digits.test(w));
       });
       //Add words to global index
-      for (var wNr in m.words) {
-        var w = m.words[wNr];
+      for (let w of m.words) {
         if (ca.words[w]) {
           ca.words[w]++;
         } else {
@@ -694,12 +717,16 @@ function parseContent(content) {
       if (m.links) user.links += m.links.length;
       if (m.attachment) user[m.attachment + 's']++;
       if (m.words) {
-        for (var wNr in m.words) {
-          var w = m.words[wNr];
-          if (user.words[w]) {
-            user.words[w]++;
+        for (let w of m.words) {
+          let word = user.getWord(w);
+          if (!word) {
+            word = {};
+            word.name = w;
+            word.count = 1
+            word.isStopword = ca.isStopword(w);
+            user.words.push(word);
           } else {
-            user.words[w] = 1;
+            word.count++;
           }
         }
       }
@@ -716,6 +743,7 @@ function parseContent(content) {
       var t = moment(m.timestamp);
       user.messagesPerWeekday[t.day()]++;
     }
+    // Store events
     if (m.event) {
       ca.events.push(m);
     }

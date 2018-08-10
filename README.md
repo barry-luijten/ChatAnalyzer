@@ -17,7 +17,7 @@ A JavaScript application to analyze WhatsApp chat dump locally in your browser.
   * Total number of documents sent (iOS only)
   * Total number of contact cards sent (iOS only)
   * Total number of locations sent
-  * Top 3 words used
+  * Top 3 -uncommon- words used
   * Top 5 emoji's used
   * Average number of words per message used
   * Total number of unique words used (vacabulary)
@@ -28,16 +28,18 @@ A JavaScript application to analyze WhatsApp chat dump locally in your browser.
 # Planned features
 * Replace legacy code for generating time based graph
 * Android dump support with auto-detection
-* Filter out commonly used words
+* Language selection
 * Auto-detect timestamp format
 * Customize analyzed date range from UI
 * Add statistics for totals
 * Modify UI layout
 * Create headless version to be used on self-hosted server
+* Calculate user score based on all rankings
 
 # Known errors
-* Ranks with equal scores are sorted randomly
-* Ranks with 0-scores are still ranked
+* *Fixed* Ranks with equal scores are sorted randomly
+* *Fixed* Ranks with 0-scores are still ranked
+* *Fixed* Ranks for Words per Message miscalculated
 
 # Limitations
 * Currently, only iOS dumps are supported.
@@ -165,9 +167,12 @@ Set of regular expressions to detect message attachments and parsing of words.
 
 ## Customizable properties
 ### ca.maxDays
-Number of days to analyze since now. Set to empty to analyze all messages contained in the dump.
+Number of days to analyze relative to the last message in the entire dump. Set to empty to analyze all messages contained in the dump.
 ### ca.dtFormat
 Timestamp format of message. Requires [Moment.js](https://momentjs.com/docs/#/parsing/string-format/) format. Default: "DD-MM-YYYY HH:mm:ss"
+### ca.stopwordLanguages
+Array with language-codes which are used for compiling a list of common words. Each language has its own set of so-called "stopwords".
+See [stopwords-iso](https://github.com/stopwords-iso/stopwords-iso).
 ## Methods
 ### ca.calculateRanks()
 ### ca.userCount()
