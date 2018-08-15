@@ -82,14 +82,19 @@ ca.users: [
     "documents": count,
     "locations": count,
     "emojis": {"emoji1": count, "emoji2": count},
-    "words": {"word1": count, "word2": count},
+    "words": [
+        {name": "word1",
+        "count": 10,
+        "isStopword": false}
+    ],
     "messagesPerWeekday": [0: count, 1: count, 2: count, 3: count, 4: count, 5: count, 6: count]
 }
 ```
 #### User object Methods
-User.wordCount()
-User.wordCountUnique()
-User.wordsByUsage(max)
+User.getWord(w)
+User.wordCount(includeStopwords = true)
+User.wordCountUnique(includeStopwords = true)
+User.wordsByUsage(max,includeStopwords = true)
 User.wordsPerMessage()
 User.emojisByUsage(max)
 User.emojiCount()
