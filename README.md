@@ -114,9 +114,6 @@ Array containing all parsed message objects:
     "attachment": "type of attachment (only on iOS, Android reports all attachments as media): image, video, audio, gif, document, location, contact, media"
 }
 ```
-### ca.words[]
-### ca.emojis[]
-### ca.events[]
 ### ca.ranks{}
 Object containing all calculated ranks
 * audios - Highest number of audio messages sent

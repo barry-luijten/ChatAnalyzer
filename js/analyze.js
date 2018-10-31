@@ -12,7 +12,8 @@ var ca = {};
 
 //Customizable settings
 ca.dtFormat = "DD-MM-YYYY HH:mm:ss";
-ca.maxDays = 30;
+ca.maxDays = null;
+ca.period = "last_month";
 ca.stopwordLanguages = ["nl","en"];
 // Add custom stopwords
 stopwords["nl"].push("btw","echt","goed","hoor","idd","‘m","'m","m'n","m’n","mee","mss","nou","z'n","z’n");
@@ -91,11 +92,6 @@ for (let l of ca.stopwordLanguages) {
 }
 ca.isStopword = function(w) {
   return ca.stopwords.indexOf(w) >= 0;
-  /*
-  return ca.stopwords.findIndex(function(el){
-    return el == w;
-  }) !== -1
-  */
 }
 
 class Message {
@@ -169,7 +165,7 @@ class User {
   }
   getWord(w) {
     return this.words.find(function(word) {
-      return word.name === w;
+      return word.name == w;
     });
   }
   wordCount(includeStopwords = true) {
@@ -622,7 +618,9 @@ function displayGroupStats(content) {
 
   // display table
   document.getElementById("groupTable").style.display = "block";
- 
+  let resultTitle = document.getElementById("resultTitle");
+  resultTitle.innerHTML = ca.chat.title;
+
   function renderStatsTableRow(user) {
   // personal STATS
     // HTML
@@ -706,13 +704,57 @@ function parseContent(content) {
     }
   }
   //Determine last message timestamp
-  ca.chat.last_timestamp = moment(ca.messages[ca.messages.length - 1].timestamp);
+  ca.chat.first_timestamp = ca.messages[0].moment;
+  ca.chat.last_timestamp = ca.messages[ca.messages.length - 1].moment;
+  ca.chat.start = moment();
+  ca.chat.end = moment();
+  if (ca.maxDays > 0) {
+    ca.chat.start.subtract(ca.maxDays, 'days');
+    ca.chat.title = "Statistics for period " + ca.chat.start.format("YYYY-MM-DD") + " - " + ca.chat.end.format("YYYY-MM-DD");
+  } else {
+    switch (ca.period) {
+      case 'last_year':
+        ca.chat.start.year(ca.chat.start.year() - 1).startOf('year'); 
+        ca.chat.end.year(ca.chat.end.year() - 1).endOf('year'); 
+        ca.chat.title = "Statistics for " + ca.chat.start.format("YYYY");
+        break;
+      case 'this_year':
+        ca.chat.start.startOf('year'); 
+        ca.chat.end.endOf('year'); 
+        ca.chat.title = "Statistics for " + ca.chat.start.format("YYYY");
+        break;
+      case 'last_month':
+        ca.chat.start.month(ca.chat.start.month() - 1).startOf('month');
+        ca.chat.end.month(ca.chat.end.month() - 1).endOf('month');
+        ca.chat.title = "Statistics for " + ca.chat.start.format("MMMM YYYY");
+        break;
+      case 'this_month':
+        ca.chat.start.startOf('month'); 
+        ca.chat.end.endOf('month'); 
+        ca.chat.title = "Statistics for " + ca.chat.start.format("MMMM YYYY");
+        break;
+      case 'last_week':
+        ca.chat.start.week(ca.chat.start.week() - 1).startOf('week');
+        ca.chat.end.week(ca.chat.end.week() - 1).endOf('week');
+        ca.chat.title = "Statistics for week " + ca.chat.start.format("w YYYY");
+        break;
+      case 'this_week':
+        ca.chat.start.startOf('week'); 
+        ca.chat.end.endOf('week'); 
+        ca.chat.title = "Statistics for week " + ca.chat.start.format("w YYYY");
+        break;
+      default: 
+        ca.chat.start = ca.chat.first_timestamp;
+        ca.chat.end = ca.chat.last_timestamp;
+        ca.chat.title = "Statistics for period " + ca.chat.start.format("YYYY-MM-DD") + " - " + ca.chat.end.format("YYYY-MM-DD");
+    }
+  }
 
   //Parse all messages
   for (var mIndex in ca.messages) {
     let m = ca.messages[mIndex];
-    let t = m.moment;
-    if (ca.maxDays > 0 && moment.duration(ca.chat.last_timestamp.diff(t)).asDays() > ca.maxDays) continue;
+    //Check timestamp to match analyzing period
+    if (m.moment > ca.chat.end || m.moment < ca.chat.start) continue;
     if (m.message) {
       //Filter links
       m.links = [];
