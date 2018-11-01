@@ -12,8 +12,8 @@ var ca = {};
 
 //Customizable settings
 ca.dtFormat = "DD-MM-YYYY HH:mm:ss";
-ca.maxDays = null;
-ca.period = "last_month";
+//ca.maxDays = 60;
+//ca.period = "last_month";
 ca.stopwordLanguages = ["nl","en"];
 // Add custom stopwords
 stopwords["nl"].push("btw","echt","goed","hoor","idd","‘m","'m","m'n","m’n","mee","mss","nou","z'n","z’n");
@@ -44,7 +44,7 @@ ca.userCount = function() {
 }
 ca.calculateRanks = function() {
   ca.ranks = {};
-  var rankings = ['messages','wordCount','wordCountUnique','wordsPerMessage','emojiCount','links','images','documents','gifs','videos','audios','contacts','locations'];
+  var rankings = ['messageCount','wordCount','wordCountUnique','wordsPerMessage','emojiCount','links','images','documents','gifs','videos','audios','contacts','locations'];
   for (var r of rankings.values()) {
     var rank = {};
     rank.name = r;
@@ -114,7 +114,7 @@ class Message {
 class User {
   constructor(name) {
     this.name = name;
-    this.messages = 0;
+    this.messages = [];
     this.words = [];
     this.links = 0;
     this.images = 0;
@@ -133,7 +133,7 @@ class User {
   }
 
   addMessage(m) {
-    this.messages++;
+    this.messages.push(m);
     if (m.links) this.links += m.links.length;
     if (m.attachment) this[m.attachment + 's']++;
     if (m.words) {
@@ -168,6 +168,20 @@ class User {
       return word.name == w;
     });
   }
+  messageCount() {
+    var c = 0;
+    for (let m of this.messages) {
+      c++;
+    }
+    return c;
+  }
+  messageCountPerDay(date) {
+    var c = 0;
+    for (let m of this.messages) {
+      if (m.moment.format("YYYYMMDD") == date.format("YYYYMMDD")) c++;
+    }
+    return c;
+  }
   wordCount(includeStopwords = true) {
     var c = 0
     for (var word of this.words) {
@@ -197,7 +211,7 @@ class User {
     return r;
   }
   wordsPerMessage() {
-    return (this.wordCount() / this.messages);
+    return (this.wordCount() / this.messageCount());
   }
   emojisByUsage(max) {
     var a = [];
@@ -325,7 +339,7 @@ function readSingleFile(e) {
     //           : for every person there is one struct, same format as above, index represents messageNumber of name
 
     // create colors:
-    backgroundColorArray = ["rgba(20, 168, 204, 0.2)", "rgba(255, 72, 64, 0.2)"];
+    backgroundColorArray = ["rgba(0, 157, 222, 0.4)", "rgba(255, 72, 64, 0.2)"];
     colorArray = ["rgb(20, 168, 204)", "rgb(255, 72, 64)"];
 
 
@@ -631,7 +645,7 @@ function displayGroupStats(content) {
     tableRows.innerHTML = //"<th scope='row'>"+"<h4 data-letters='" + content[i].name.match(/\b\w/g).join('') + "'></h4>"+"</th>" +
                           "<th scope='row'>"+"<h4 data-letters='" + user.name.substring(0,1) + "'></h4>"+"</th>" +
                           "<td>"+user.name+"</td>" +
-                          "<td>"+user.messages + ca.getRankEmoji(user.rank('messages')) + "</td>" +
+                          "<td>"+user.messageCount() + ca.getRankEmoji(user.rank('messageCount')) + "</td>" +
                           "<td>"+user.wordCount() + ca.getRankEmoji(user.rank('wordCount')) +"</td>"+
                           "<td>"+user.emojiCount() + ca.getRankEmoji(user.rank('emojiCount')) +"</td>"+
                           "<td>"+user.images + ca.getRankEmoji(user.rank('images')) + "</td>" +
@@ -661,7 +675,7 @@ function displayGroupStats(content) {
   // Day Radar
   createDayRadar();
   // Chronological Graph
-  createChonologicalGraph(content);
+  createChronologicalGraph();
 }
 
 // # ------------------------------------------------------------------------- #
@@ -1315,8 +1329,8 @@ function createDayRadar() {
   }
 
   var i = 0;
-  for (i = 0;i < ca.ranks["messages"].scores.length && i < 10;i++) {
-    var r = ca.ranks["messages"].scores[i];
+  for (i = 0;i < ca.ranks["messageCount"].scores.length && i < 10;i++) {
+    var r = ca.ranks["messageCount"].scores[i];
     var u = ca.users[r.user];
     data.datasets.push({
       label: u.name,
@@ -1368,6 +1382,153 @@ function createDayRadar() {
           }
         });
 
+}
+// Chronological Graph
+function createChronologicalGraph() {
+
+  // better tooltips
+  Chart.defaults.global.pointHitDetectionRadius = 10;
+  var customTooltips = function(tooltip) {
+    // Tooltip Element
+    var tooltipEl = document.getElementById('chartjs-tooltip');
+
+    if (!tooltipEl) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.id = 'chartjs-tooltip';
+      tooltipEl.innerHTML = '<table></table>';
+      this._chart.canvas.parentNode.appendChild(tooltipEl);
+    }
+
+    // Hide if no tooltip
+    if (tooltip.opacity === 0) {
+      tooltipEl.style.opacity = 0;
+      return;
+    }
+
+    // Set caret Position
+    tooltipEl.classList.remove('above', 'below', 'no-transform');
+    if (tooltip.yAlign) {
+      tooltipEl.classList.add(tooltip.yAlign);
+    } else {
+      tooltipEl.classList.add('no-transform');
+    }
+
+    function getBody(bodyItem) {
+      return bodyItem.lines;
+    }
+
+    // Set Text
+    if (tooltip.body) {
+      var titleLines = tooltip.title || [];
+      var bodyLines = tooltip.body.map(getBody);
+
+      var innerHtml = '<thead>';
+
+      titleLines.forEach(function(title) {
+        innerHtml += '<tr><th>' + title.substring(0,12) + '</th></tr>';
+        // the title is the date - we only want to show the day not the time
+      });
+      innerHtml += '</thead><tbody>';
+
+      bodyLines.forEach(function(body, i) {
+        var colors = tooltip.labelColors[i];
+        var style = 'background:' + colors.backgroundColor;
+        style += '; border-color:' + colors.borderColor;
+        style += '; border-width: 2px';
+        var span = '<span class="chartjs-tooltip-key" style="' + style + '"></span>';
+        innerHtml += '<tr><td>' +span + body + '</td></tr>';
+        // body is NAME: Count
+      });
+      innerHtml += '</tbody>';
+
+      var tableRoot = tooltipEl.querySelector('table');
+      tableRoot.innerHTML = innerHtml;
+    }
+
+    var positionY = this._chart.canvas.offsetTop;
+    var positionX = this._chart.canvas.offsetLeft;
+
+    // Display, position, and set styles for font
+    tooltipEl.style.opacity = 1;
+    tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+    tooltipEl.style.top = positionY + tooltip.caretY + 'px';
+    tooltipEl.style.fontFamily = tooltip._bodyFontFamily;
+    tooltipEl.style.fontSize = tooltip.bodyFontSize + 'px';
+    tooltipEl.style.fontStyle = tooltip._bodyFontStyle;
+    tooltipEl.style.padding = tooltip.yPadding + 'px ' + tooltip.xPadding + 'px';
+  };
+  var data = {datasets: []};
+  var user = ca.chat;
+  var activity = [];
+  var days = ca.chat.end.diff(ca.chat.start,'days');
+  if (days > 100) return;
+  var d = moment(ca.chat.start);
+  while (d < ca.chat.end) {
+    //data.labels.push(d.format("DD-MM-YYYY"));
+    activity.push({t: d.toDate(), y: user.messageCountPerDay(d)});
+    d.add(1,'days');
+  }
+  data.datasets.push({
+    label: user.name,
+    data: activity,
+    fill: true,
+    steppedLine: true,
+    pointRadius: 3,
+    borderWidth: 1,
+    pointHoverRadius: 10,
+    backgroundColor:backgroundColorArray[0],
+    borderColor: user.color,
+    pointBackgroundColor: user.color,
+    pointBorderColor:"#ffffff",
+    pointHoverBackgroundColor:"#ffffff",
+    pointHoverBorderColor: user.color
+  });
+
+  var unit = "month";
+  if (activity.length < 22) {
+    unit = "day";
+  } else if (activity.length < 33) {
+    unit = "week";
+  } else if (activity.length < 33*3) {
+    unit = "month";
+  } else if (activity.length < 33* 15) {
+    unit = "year";
+  }
+  unit = undefined;
+
+  // create chart
+  new Chart(
+    document.getElementById('chronologicalGraph').getContext('2d'),
+      {
+        type: 'bar',
+        data: data,
+        options: {
+          scales: {
+            xAxes: [{
+              type: 'time',
+              distribution: 'linear',
+              time: {
+                    unit: unit,
+                    displayFormats: {
+                      day: 'ddd DD-MM'
+                    }
+              }}],
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Number Of Messages'
+              }
+            }]
+          },
+          tooltips: {
+            enabled: false,
+            mode: 'index',
+            position: 'nearest',
+            custom: customTooltips
+          }
+        }
+      }
+  );
 }
 
 // Chronological Graph
