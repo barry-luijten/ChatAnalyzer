@@ -8,7 +8,7 @@ var ca = {};
 ca.dtFormat = "DD-MM-YYYY HH:mm:ss";
 // Limit period being analyzed
 //ca.maxDays = 60;
-ca.period = "last_month";
+//ca.period = "this_year";
 ca.stopwordLanguages = ["nl","en"];
 // Add custom stopwords
 stopwords["nl"].push("btw","echt","goed","hoor","idd","‘m","'m","m'n","m’n","mee","mss","nou","z'n","z’n");
@@ -133,6 +133,7 @@ class User {
     this.contacts = 0;
     this.locations = 0;
     this.emojis = {};
+    this.events = [];
     this.messagesPerWeekday = [];
     for (let i = 0; i < 7; i++) {
       this.messagesPerWeekday[i] = 0;
@@ -182,6 +183,28 @@ class User {
       c++;
     }
     return c;
+  }
+  //Get timeseries (for graphs)
+  getMessageCountTimeSeries(unit) {
+    var ts = [];
+    var unitStart;
+    var unitEnd = 0;
+    var c = 0;
+    for (let m of this.messages) {
+      if (m.moment > unitEnd) {
+        if (unitStart) {
+          ts.push({x: unitStart.toDate(), y: c})
+        }
+        unitStart = moment(m.moment).startOf(unit);
+        unitEnd = moment(m.moment).endOf(unit);
+        c = 0;
+      }
+      c++;
+    }
+    if (unitStart) {
+      ts.push({x: unitStart.toDate(), y: c})
+    }
+    return ts;
   }
   messageCountPerDay(date) {
     var c = 0;
@@ -264,13 +287,45 @@ class User {
 class Chat extends User {
   constructor() {
     super("Totals");
-    this.events = [];
     this.last_timestamp = '';
   }
   rank(ranking) {
     return 0;
   }
-}
+  analyzeEvents() {
+    for (let e of this.events) {
+      if (e.event.includes(' was added')) {
+        e.eventType = "userAdded";
+        e.subject = e.event.substring(0, e.event.indexOf(' was added'));
+        if (ca.users[e.subject]) {
+          if (! ca.users[e.subject].dateAdded) {
+            ca.users[e.subject].dateAdded = e.moment;
+          }
+          ca.users[e.subject].events.push(e);
+        }
+      } else if (e.event.includes(' added ')) {
+        e.eventType = "userAdded";
+        e.actor = e.event.substring(0, e.event.indexOf(' added '));
+        e.subject = e.event.substring(e.event.indexOf(' added ') + 7);
+        if (ca.users[e.actor]){
+          ca.users[e.actor].events.push(e);
+        }
+        if (ca.users[e.subject]) {
+          if (! ca.users[e.subject].dateAdded) {
+            ca.users[e.subject].dateAdded = e.moment;
+          }
+          ca.users[e.subject].events.push(e);
+        }
+      } else if (e.event.includes(' left')) {
+        e.eventType = "userLeft";
+        e.subject = e.event.substring(0, e.event.indexOf(' left'));
+        if (ca.users[e.subject]) {
+          ca.users[e.subject].dateRemoved = e.moment;
+          ca.users[e.subject].events.push(e);
+        }
+      }
+    }
+  }
 
 // ---- END INIT ----
 
@@ -559,6 +614,7 @@ function parseContent(content) {
       ca.chat.events.push(m);
     }
   }
+  ca.chat.analyzeEvents();
 }
 
 // ---- GRAPHS ----
@@ -701,16 +757,16 @@ function createChronologicalGraph() {
   };
   var data = {datasets: []};
   var user = ca.chat;
-  var activity = [];
+  var activity, unit;
   var days = ca.chat.end.diff(ca.chat.start,'days');
-  //TODO: Change resolution based on period length
-  if (days > 100) return;
-  var d = moment(ca.chat.start);
-  while (d < ca.chat.end) {
-    //data.labels.push(d.format("DD-MM-YYYY"));
-    activity.push({t: d.toDate(), y: user.messageCountPerDay(d)});
-    d.add(1,'days');
+  if (days <= 100) {
+    unit = 'day';
+  } else if (days <= 700) {
+    unit = 'week';
+  } else {
+    unit = 'month';
   }
+  activity = user.getMessageCountTimeSeries(unit);
   data.datasets.push({
     label: user.name,
     data: activity,
@@ -727,17 +783,7 @@ function createChronologicalGraph() {
     pointHoverBorderColor: user.color
   });
 
-  var unit = "month";
-  if (activity.length < 22) {
-    unit = "day";
-  } else if (activity.length < 33) {
-    unit = "week";
-  } else if (activity.length < 33*3) {
-    unit = "month";
-  } else if (activity.length < 33* 15) {
-    unit = "year";
-  }
-  unit = undefined;
+ // unit = undefined;
 
   // create chart
   new Chart(
