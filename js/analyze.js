@@ -22,13 +22,19 @@ ca.re.video = new RegExp(/\u200evideo omitted/);
 ca.re.audio = new RegExp(/\u200eaudio omitted/);
 ca.re.contact = new RegExp(/\u200econtact card omitted/);
 ca.re.location = new RegExp(/\u200elocation:/);
+ca.re.events = {};
+ca.re.events.userChangedPhone = new RegExp(/ security code changed\.$/);
+ca.re.events.userAddedLegacy = new RegExp(/(.*)( was added$)/);
+ca.re.events.userAdded = new RegExp(/(.*)( added )(.*)/);
+ca.re.events.userRemovedLegacy = new RegExp(/(.*)( was removed$)/);
+ca.re.events.userRemoved = new RegExp(/(.*)( removed )(.*)/);
+ca.re.events.userLeft = new RegExp(/(.*)( left$)/);
 ca.re.link = new RegExp(/(https?:\/\/[^\s]*)/);
 ca.re.words = new RegExp(/[\b\s:;"'~`!@#$%^&*()_\-+=\[\]{}|\\<,.>?/°]/);
 ca.re.digits = new RegExp(/\D/);
 ca.re.message = new RegExp(/\[(.*),\s(.*)\]\s((.*?):\s(.*)|\u200e(.*))/);
 // https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
 ca.re.emoji = new RegExp(/\uD83C\uDFF4(?:\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\u200D\u2620\uFE0F)|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDB0-\uDDB3])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDD1-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])?|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF9]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD70\uDD73-\uDD76\uDD7A\uDD7C-\uDDA2\uDDB0-\uDDB9\uDDC0-\uDDC2\uDDD0-\uDDFF])\uFE0F/g);
-
 ca.users = {};
 ca.userCount = function() {
   var c = 0;
@@ -100,6 +106,48 @@ ca.getRandomColor = function() {
   return color;
 }
 
+ca.parseContent = function(content) {
+  var lines = content.split('\n');
+  var m;
+  var messages = [];
+  for (let line of lines) {
+    // Remove CR characters
+    line = line.replace('\r','');
+    var match = ca.re.message.exec(line);
+    if (match) {
+      var t = moment(match[1] + ' ' + match[2], ca.dtFormat);
+      m = new Message(t);
+      if (match[6]) {
+        m.event = match[6];
+      } else {
+        m.user = match[4];
+        var s = match[5].toLowerCase();
+        if (ca.re.image.test(s)) m.attachment = 'image';
+        if (ca.re.document.test(s)) m.attachment = 'document';
+        if (ca.re.gif.test(s)) m.attachment = 'gif';
+        if (ca.re.video.test(s)) m.attachment = 'video';
+        if (ca.re.audio.test(s)) m.attachment = 'audio';
+        if (ca.re.contact.test(s)) m.attachment = 'contact';
+        if (ca.re.location.test(s)) m.attachment = 'location';
+        if (ca.re.events.userChangedPhone.test(s)) m.event = match[5];
+        if (! m.attachment && ! m.event) m.message = match[5];
+      }
+      messages.push(m);
+    } else if (messages.length > 0) {
+      m = messages[messages.length - 1];
+      //Append multiline messages
+      if (m.message) m.message += '\n';
+      m.message += line;
+    }
+  }
+  //Analyze all parsed messages and add them to chat object
+  ca.chat = new Chat();
+  for (let m of messages) {
+    m.analyze();
+    ca.chat.addMessage(m);
+  }
+}
+
 // ---- CLASSES ----
 
 class Message {
@@ -116,13 +164,155 @@ class Message {
   get moment() {
     return moment(this.timestamp);
   }
+  analyze() {
+    if (this.message) {
+      //Filter links
+      this.links = [];
+      let linkMatch = ca.re.link.exec(this.message);
+      while (linkMatch != null) {
+        this.links.push(linkMatch[1]);
+        //Strip link from message
+        this.message = this.message.substring(0,linkMatch.index) + this.message.substring(linkMatch.index + linkMatch[1].length);
+        linkMatch = ca.re.link.exec(this.message);
+      }
+      //Handle words
+      this.words = this.message.toLowerCase().split(ca.re.words);
+      //Strip emoji's from words
+      for (let wNr in this.words) {
+        this.words[wNr] = this.words[wNr].replace(ca.re.emoji,'');
+      }
+      //Remove empty words
+      this.words = this.words.filter(function (w) {
+        return (w != '' && ca.re.digits.test(w));
+      });
+      //Filter emoji's
+      this.emojis = [];
+      let emojiMatch;
+      while (emojiMatch = ca.re.emoji.exec(this.message)) {
+        let e = emojiMatch[0];
+        if (this.emojis[e]) {
+          this.emojis[e] ++;
+        } else {
+          this.emojis[e] = 1;
+        }
+      }
+    }
+    if (this.event) {
+      if (ca.re.events.userAdded.test(this.event)){
+        let match = ca.re.events.userAdded.exec(this.event);
+        this.eventType = "userAdded";
+        this.user = match[3];
+        this.actor = match[1];
+      } 
+      if (ca.re.events.userAddedLegacy.test(this.event)){
+        let match = ca.re.events.userAddedLegacy.exec(this.event);
+        this.eventType = "userAdded";
+        this.user = match[1];
+      } 
+      if (ca.re.events.userRemoved.test(this.event)){
+        let match = ca.re.events.userRemoved.exec(this.event);
+        this.eventType = "userRemoved";
+        this.user = match[3];
+        this.actor = match[1];
+      } 
+      if (ca.re.events.userRemovedLegacy.test(this.event)){
+        let match = ca.re.events.userRemovedLegacy.exec(this.event);
+        this.eventType = "userRemoved";
+        this.user = match[1];
+      } 
+      if (ca.re.events.userLeft.test(this.event)){
+        let match = ca.re.events.userLeft.exec(this.event);
+        this.eventType = "userLeft";
+        this.user = match[1];
+      }
+      if (ca.re.events.userChangedPhone.test(this.event)){
+        this.eventType = "userChangedPhone";
+        //Username is already parsed
+      }
+    }
+  }
 }
 
-// User class
-class User {
+class Chat {
   constructor(name) {
     this.name = name;
     this.messages = [];
+    this.events = [];
+  }
+  get end() {
+    if (this.messages.length == 0) return undefined;
+    return this.messages[this.messages.length - 1].moment;
+  }
+  get messageCount() {
+    return this.messages.length;
+  }
+  get start() {
+    if (this.messages.length == 0) return undefined;
+    return this.messages[0].moment;
+  }
+  addMessage(m) {
+    if (m.message || m.attachment) this.messages.push(m);
+    if (m.event) this.events.push(m);
+  }
+  getStatisticsPeriod(start, end) {
+    var cs = new ChatStatistics();
+    for (let m of this.messages) {
+      if (m.moment >= start && m.moment <= end) cs.addMessage(m);
+    }
+    return cs;
+  }
+  getStatisticsPeriodByUnit(relativeIndicator, num = 1, unit) {
+    var start = this.start;
+    var end = this.end;
+    var title = "";
+    switch (relativeIndicator) {
+      case 'last':
+        start = this.end;
+        start[unit](start[unit]() - num).startOf(unit); 
+        end[unit](end[unit]() - 1).endOf(unit); 
+        break;
+      case 'this':
+        start = this.end;
+        start.startOf(unit); 
+        end.endOf(unit); 
+        break;
+      case 'first':
+        start.startOf(unit); 
+        end = this.start;
+        end[unit](end[unit]() + num - 1).endOf(unit); 
+        break;
+      default: 
+    }
+    switch (unit) {
+      case 'year':
+        title = "Statistics for " + start.format("YYYY");
+        if (num > 1) title += " - " + end.format("YYYY");
+        break;
+      case 'month':
+        title = "Statistics for " + start.format("MMMM YYYY");
+        if (num > 1) title += " - " + end.format("MMMM YYYY");
+        break;
+      case 'week':
+        title = "Statistics for week " + start.format("w YYYY");
+        if (num > 1) titile += " - " + end.format("w YYYY");
+        break;
+      case 'day':
+        title = "Statistics for " + start.format("YYYY-MM-DD");
+        if (num > 1) titile += " - " + end.format("YYYY-MM-DD");
+        break;
+      default:
+        title = "Statistics for period " + start.format("YYYY-MM-DD") + " - " + end.format("YYYY-MM-DD");
+    }
+    var cs = this.getStatisticsPeriod(start, end);
+    cs.periodDesc = title;
+    return cs;
+  }
+}
+
+// MessageCollection class
+class Statistics extends Chat {
+  constructor(name) {
+    super(name);
     this.words = [];
     this.links = 0;
     this.images = 0;
@@ -133,7 +323,6 @@ class User {
     this.contacts = 0;
     this.locations = 0;
     this.emojis = {};
-    this.events = [];
     this.messagesPerWeekday = [];
     for (let i = 0; i < 7; i++) {
       this.messagesPerWeekday[i] = 0;
@@ -142,7 +331,7 @@ class User {
   }
 
   addMessage(m) {
-    this.messages.push(m);
+    super.addMessage(m);
     if (m.links) this.links += m.links.length;
     if (m.attachment) this[m.attachment + 's']++;
     if (m.words) {
@@ -176,13 +365,6 @@ class User {
     return this.words.find(function(word) {
       return word.name == w;
     });
-  }
-  messageCount() {
-    var c = 0;
-    for (let m of this.messages) {
-      c++;
-    }
-    return c;
   }
   //Get timeseries (for graphs)
   getMessageCountTimeSeries(unit) {
@@ -242,7 +424,7 @@ class User {
     return r;
   }
   wordsPerMessage() {
-    return (this.wordCount() / this.messageCount());
+    return (this.wordCount() / this.messageCount);
   }
   emojisByUsage(max) {
     var a = [];
@@ -265,67 +447,102 @@ class User {
     }
     return r;
   }
-  emojiCount() {
+  get emojiCount() {
     var c = 0
     for (var w in this.emojis) {
       c += this.emojis[w];
     }
     return c;
   }
-  rank(ranking) {
-    if (!ca.ranks) ca.calculateRanks();
-    if (!ca.ranks[ranking]) return undefined;
-    var username = this.name;
-    var index = ca.ranks[ranking].scores.findIndex(function(score){
-      return score.user == username;
-    })
-    return ca.ranks[ranking].scores[index].ranking;
+}
+
+// User class
+class UserStatistics extends Statistics {
+  constructor(name) {
+    super(name);
+    this.dateAdded = undefined;
+    this.dateRemoved = undefined;
   }
 }
 
 // Chat class
-class Chat extends User {
+class ChatStatistics extends Statistics {
   constructor() {
     super("Totals");
     this.last_timestamp = '';
+    this.users = {};
+    this.ranks = undefined;
   }
-  rank(ranking) {
-    return 0;
+  get title() {
+    if (!this.periodDesc) this.periodDesc = "Statistics for period " + this.start.format("YYYY-MM-DD") + " - " + this.end.format("YYYY-MM-DD");
+    return this.periodDesc;
   }
-  analyzeEvents() {
-    for (let e of this.events) {
-      if (e.event.includes(' was added')) {
-        e.eventType = "userAdded";
-        e.subject = e.event.substring(0, e.event.indexOf(' was added'));
-        if (ca.users[e.subject]) {
-          if (! ca.users[e.subject].dateAdded) {
-            ca.users[e.subject].dateAdded = e.moment;
-          }
-          ca.users[e.subject].events.push(e);
-        }
-      } else if (e.event.includes(' added ')) {
-        e.eventType = "userAdded";
-        e.actor = e.event.substring(0, e.event.indexOf(' added '));
-        e.subject = e.event.substring(e.event.indexOf(' added ') + 7);
-        if (ca.users[e.actor]){
-          ca.users[e.actor].events.push(e);
-        }
-        if (ca.users[e.subject]) {
-          if (! ca.users[e.subject].dateAdded) {
-            ca.users[e.subject].dateAdded = e.moment;
-          }
-          ca.users[e.subject].events.push(e);
-        }
-      } else if (e.event.includes(' left')) {
-        e.eventType = "userLeft";
-        e.subject = e.event.substring(0, e.event.indexOf(' left'));
-        if (ca.users[e.subject]) {
-          ca.users[e.subject].dateRemoved = e.moment;
-          ca.users[e.subject].events.push(e);
-        }
-      }
+  get userCount() {
+    var c = 0;
+    for (var u in this.users){
+      c++;
+    }
+    return c;
+  }
+  addMessage(m) {
+    super.addMessage(m);
+    if (m.user) {
+      this.getUser(m.user).addMessage(m)
+    }
+    if (m.actor) {
+      this.getUser(m.actor).addMessage(m)
     }
   }
+  getUser(userName) {
+    if (!this.users[userName]) {
+      this.users[userName] = new UserStatistics(userName);
+    }
+    return this.users[userName];
+  }
+  getUserRank(userName, ranking) {
+    if (!this.ranks) this.calculateRanks();
+    if (!this.ranks[ranking]) return undefined;
+    var index = this.ranks[ranking].scores.findIndex(function(score){
+      return score.user == userName;
+    })
+    if (index == -1) return -1;
+    return this.ranks[ranking].scores[index].ranking;
+  }
+  calculateRanks() {
+    this.ranks = {};
+    var rankings = ['messageCount','wordCount','wordCountUnique','wordsPerMessage','emojiCount','links','images','documents','gifs','videos','audios','contacts','locations'];
+    for (var r of rankings.values()) {
+      var rank = {};
+      rank.name = r;
+      rank.value = 0;
+      rank.leader = '';
+      rank.scores = [];
+      for (var u in this.users){
+        var score = {};
+        score.user = u;
+        if (typeof this.users[u][r] == "function") {
+          score.value = this.users[u][r]();
+        } else {
+          score.value = this.users[u][r];
+        }
+        rank.scores.push(score);
+      }
+      rank.scores.sort(function (a, b){
+        return b.value - a.value;
+      });
+      // Assign rankings per score
+      var ranking = 1;
+      for (var i in rank.scores) {
+        if (i > 0 && (rank.scores[i].value < rank.scores[i - 1].value)) {
+          ranking++;
+        }
+        if (rank.scores[i].value == 0) ranking = 0;
+        rank.scores[i].ranking = ranking;
+      }
+      this.ranks[r] = rank;
+    }
+  }
+}
 
 // ---- END INIT ----
 
@@ -336,6 +553,7 @@ class Chat extends User {
 // file listener
 document.getElementById('file-input')
   .addEventListener('change', readSingleFile, false);
+
 
 //Read File
 function readSingleFile(e) {
@@ -375,15 +593,15 @@ function readSingleFile(e) {
   reader.onload = function(e) {
 
     var contents = e.target.result;
-    parseContent(contents);
-
+    ca.parseContent(contents);
+    var chatStats = ca.chat.getStatisticsPeriodByUnit('last', 1, 'month');
     // create colors:
     backgroundColorArray = ["rgba(0, 157, 222, 0.4)", "rgba(255, 72, 64, 0.2)"];
     colorArray = ["rgb(20, 168, 204)", "rgb(255, 72, 64)"];
 
 
     // checks if group chat
-    if (ca.userCount() > 0) {
+    if (chatStats.userCount > 0) {
       // GROUP CHAT ----------------------------------------------------------------------
 
       // TODO: What to do when this is a normal chat misidentified as a group chat?
@@ -400,7 +618,11 @@ function readSingleFile(e) {
 
 
       // analyze
-      displayGroupStats();
+      displayGroupStats(chatStats);
+      // Day Radar
+      createDayRadar(chatStats);
+      // Chronological Graph
+      createChronologicalGraph(chatStats);
     } 
 
     // CLEAN HTML -------------------------------------------------------------------------
@@ -421,56 +643,51 @@ function readSingleFile(e) {
   reader.readAsText(file);
 }
 
-function displayGroupStats() {
+function displayGroupStats(chatStats) {
 
   // TODO: figure out the group name!
 
   // display table
   document.getElementById("groupTable").style.display = "block";
   let resultTitle = document.getElementById("resultTitle");
-  resultTitle.innerHTML = ca.chat.title;
+  resultTitle.innerHTML = chatStats.title;
 
-  function renderStatsTableRow(user) {
+  function renderStatsTableRow(stats) {
   // personal STATS
     // HTML
     // create rows
     var tableRows = document.createElement('tr');
-    var topWords = user.wordsByUsage(3,false).join(' - ');
-    var topEmojis = user.emojisByUsage(5).join(' - ');
+    var topWords = stats.wordsByUsage(3,false).join(' - ');
+    var topEmojis = stats.emojisByUsage(5).join(' - ');
     tableRows.innerHTML = //"<th scope='row'>"+"<h4 data-letters='" + content[i].name.match(/\b\w/g).join('') + "'></h4>"+"</th>" +
-                          "<th scope='row'>"+"<h4 data-letters='" + user.name.substring(0,1) + "'></h4>"+"</th>" +
-                          "<td>"+user.name+"</td>" +
-                          "<td>"+user.messageCount() + ca.getRankEmoji(user.rank('messageCount')) + "</td>" +
-                          "<td>"+user.wordCount() + ca.getRankEmoji(user.rank('wordCount')) +"</td>"+
-                          "<td>"+user.emojiCount() + ca.getRankEmoji(user.rank('emojiCount')) +"</td>"+
-                          "<td>"+user.images + ca.getRankEmoji(user.rank('images')) + "</td>" +
-                          "<td>"+user.videos + ca.getRankEmoji(user.rank('videos')) + "</td>" +
-                          "<td>"+user.gifs + ca.getRankEmoji(user.rank('gifs')) + "</td>" +
-                          "<td>"+user.links + ca.getRankEmoji(user.rank('links')) + "</td>" +
-                          "<td>"+user.audios + ca.getRankEmoji(user.rank('audios')) + "</td>" +
-                          "<td>"+user.documents + ca.getRankEmoji(user.rank('documents')) + "</td>" +
-                          "<td>"+user.contacts + ca.getRankEmoji(user.rank('contacts')) + "</td>" +
-                          "<td>"+user.locations + ca.getRankEmoji(user.rank('locations')) + "</td>" +
+                          "<th scope='row'>"+"<h4 data-letters='" + stats.name.substring(0,1) + "'></h4>"+"</th>" +
+                          "<td>"+stats.name+"</td>" +
+                          "<td>"+stats.messageCount + ca.getRankEmoji(chatStats.getUserRank(stats.name,'messageCount')) + "</td>" +
+                          "<td>"+stats.wordCount() + ca.getRankEmoji(chatStats.getUserRank(stats.name,'wordCount')) +"</td>"+
+                          "<td>"+stats.emojiCount + ca.getRankEmoji(chatStats.getUserRank(stats.name,'emojiCount')) +"</td>"+
+                          "<td>"+stats.images + ca.getRankEmoji(chatStats.getUserRank(stats.name,'images')) + "</td>" +
+                          "<td>"+stats.videos + ca.getRankEmoji(chatStats.getUserRank(stats.name,'videos')) + "</td>" +
+                          "<td>"+stats.gifs + ca.getRankEmoji(chatStats.getUserRank(stats.name,'gifs')) + "</td>" +
+                          "<td>"+stats.links + ca.getRankEmoji(chatStats.getUserRank(stats.name,'links')) + "</td>" +
+                          "<td>"+stats.audios + ca.getRankEmoji(chatStats.getUserRank(stats.name,'audios')) + "</td>" +
+                          "<td>"+stats.documents + ca.getRankEmoji(chatStats.getUserRank(stats.name,'documents')) + "</td>" +
+                          "<td>"+stats.contacts + ca.getRankEmoji(chatStats.getUserRank(stats.name,'contacts')) + "</td>" +
+                          "<td>"+stats.locations + ca.getRankEmoji(chatStats.getUserRank(stats.name,'locations')) + "</td>" +
                           "<td>"+topWords+"</td>" + 
                           "<td>"+topEmojis+"</td>" +
-                          "<td>"+user.wordsPerMessage().toFixed(1) + ca.getRankEmoji(user.rank('wordsPerMessage')) + "</td>" +
-                          "<td>"+user.wordCountUnique() + ca.getRankEmoji(user.rank('wordCountUnique')) + "</td>";
+                          "<td>"+stats.wordsPerMessage().toFixed(1) + ca.getRankEmoji(chatStats.getUserRank(stats.name,'wordsPerMessage')) + "</td>" +
+                          "<td>"+stats.wordCountUnique() + ca.getRankEmoji(chatStats.getUserRank(stats.name,'wordCountUnique')) + "</td>";
 
     document.getElementById('groupTableRows').appendChild(tableRows);
   }
-  for (let u in ca.users) {
-    let user = ca.users[u];
-    renderStatsTableRow(user)
+  for (let u in chatStats.users) {
+    let userStats = chatStats.users[u];
+    renderStatsTableRow(userStats)
   }
-  renderStatsTableRow(ca.chat);
+  renderStatsTableRow(chatStats);
 
   // sort table by most messages
   sortTable(1);
-
-  // Day Radar
-  createDayRadar();
-  // Chronological Graph
-  createChronologicalGraph();
 }
 
 // # ------------------------------------------------------------------------- #
@@ -504,9 +721,9 @@ function parseContent(content) {
         if (ca.re.location.test(s)) m.attachment = 'location';
         if (! m.attachment) m.message = match[5];
       }
-      ca.messages.push(m);
-    } else if (ca.messages.length > 0) {
-      m = ca.messages[ca.messages.length - 1];
+      ca.chat.messages.push(m);
+    } else if (ca.chat.messages.length > 0) {
+      m = ca.chat.messages[ca.chat.messages.length - 1];
       //Append multiline messages
       if (m.message) m.message += '\n';
       m.message += line;
@@ -620,16 +837,16 @@ function parseContent(content) {
 // ---- GRAPHS ----
 
 // Day Radar
-function createDayRadar() {
+function createDayRadar(chat) {
   var data = {labels: [], datasets: []};
-  for (var d in ca.chat.messagesPerWeekday) {
+  for (var d in chat.messagesPerWeekday) {
     data.labels.push(moment().day(d).format('dddd'));
   }
 
   var i = 0;
-  for (i = 0;i < ca.ranks["messageCount"].scores.length && i < 10;i++) {
-    var r = ca.ranks["messageCount"].scores[i];
-    var u = ca.users[r.user];
+  for (i = 0;i < chat.ranks["messageCount"].scores.length && i < 10;i++) {
+    var r = chat.ranks["messageCount"].scores[i];
+    var u = chat.users[r.user];
     data.datasets.push({
       label: u.name,
       data: u.messagesPerWeekday,
@@ -645,14 +862,14 @@ function createDayRadar() {
   //Add total messages dataset
   data.datasets.push({
     label: "Total number of messages",
-    data: ca.chat.messagesPerWeekday,
+    data: chat.messagesPerWeekday,
     fill:true,
     backgroundColor: backgroundColorArray[0],
-    borderColor: ca.chat.color,
-    pointBackgroundColor: ca.chat.color,
+    borderColor: chat.color,
+    pointBackgroundColor: chat.color,
     pointBorderColor:"#fff",
     pointHoverBackgroundColor:"#fff",
-    pointHoverBorderColor: ca.chat.color
+    pointHoverBorderColor: chat.color
   });
 
   new Chart(
@@ -683,7 +900,7 @@ function createDayRadar() {
 }
 
 // Chronological Graph
-function createChronologicalGraph() {
+function createChronologicalGraph(chat) {
   // better tooltips
   Chart.defaults.global.pointHitDetectionRadius = 10;
   var customTooltips = function(tooltip) {
@@ -756,9 +973,8 @@ function createChronologicalGraph() {
     tooltipEl.style.padding = tooltip.yPadding + 'px ' + tooltip.xPadding + 'px';
   };
   var data = {datasets: []};
-  var user = ca.chat;
   var activity, unit;
-  var days = ca.chat.end.diff(ca.chat.start,'days');
+  var days = chat.end.diff(chat.start,'days');
   if (days <= 100) {
     unit = 'day';
   } else if (days <= 700) {
@@ -766,9 +982,9 @@ function createChronologicalGraph() {
   } else {
     unit = 'month';
   }
-  activity = user.getMessageCountTimeSeries(unit);
+  activity = chat.getMessageCountTimeSeries(unit);
   data.datasets.push({
-    label: user.name,
+    label: chat.name,
     data: activity,
     fill: true,
     steppedLine: true,
@@ -776,11 +992,11 @@ function createChronologicalGraph() {
     borderWidth: 1,
     pointHoverRadius: 10,
     backgroundColor:backgroundColorArray[0],
-    borderColor: user.color,
-    pointBackgroundColor: user.color,
+    borderColor: chat.color,
+    pointBackgroundColor: chat.color,
     pointBorderColor:"#ffffff",
     pointHoverBackgroundColor:"#ffffff",
-    pointHoverBorderColor: user.color
+    pointHoverBorderColor: chat.color
   });
 
  // unit = undefined;
