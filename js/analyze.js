@@ -11,7 +11,7 @@ ca.dtFormat = "DD-MM-YYYY HH:mm:ss";
 //ca.period = "this_year";
 ca.stopwordLanguages = ["nl","en"];
 // Add custom stopwords
-stopwords["nl"].push("btw","echt","goed","hoor","idd","‘m","'m","m'n","m’n","mee","mss","nou","z'n","z’n");
+stopwords["nl"].push("btw","echt","gaan","gaat","goed","hoor","idd","‘m","'m","m'n","m’n","mee","mss","nou","vind","weet","z'n","z’n","zit");
 
 //Regular expressions
 ca.re = {};
@@ -31,7 +31,8 @@ ca.re.events.userRemovedLegacy = new RegExp(/(.*)( was removed$)/);
 ca.re.events.userRemoved = new RegExp(/(.*)( removed )(.*)/);
 ca.re.events.userLeft = new RegExp(/(.*)( left$)/);
 ca.re.link = new RegExp(/(https?:\/\/[^\s]*)/);
-ca.re.words = new RegExp(/[\b\s:;"'~`!@#$%^&*()_\-+=\[\]{}|\\<,.>?/°]/);
+ca.re.words = new RegExp(/[\b\s:;"“”'‘’~`!@#$€%^&*()_\-+=\[\]{}|\\<,.>?\/°]/gm);
+ca.re.special = new RegExp(/[^a-zA-Z0-9]/gm);
 ca.re.digits = new RegExp(/\D/);
 ca.re.message = new RegExp(/\[(.*),\s(.*)\]\s((.*?):\s(.*)|\u200e(.*))/);
 // https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
@@ -64,7 +65,29 @@ ca.getRandomColor = function() {
   return color;
 }
 
+ca.logType = {
+  info: 0,
+  warning: 1,
+  critical: 2,
+  unknown: 3,
+};
+ca.log = function(msg, logType = ca.logType.info) {
+  switch (logType) {
+    case 0: msg = "Info: " + msg;
+      break;
+    case 1: msg = "Warning: " + msg;
+      break;
+    case 2: msg = "Critical: " + msg;
+      break;
+    case 3: msg = "Unknown: " + msg;
+      break;
+    default:
+  }
+  console.log(moment().format("YYYY-MM-DD HH:mm:ss") + ' ' + msg);
+}
+
 ca.parseContent = function(content) {
+  ca.log("Parsing content...");
   var lines = content.split('\n');
   var m;
   var messages = [];
@@ -83,6 +106,7 @@ ca.parseContent = function(content) {
         if (ca.re.image.test(s)) m.attachment = 'image';
         if (ca.re.document.test(s)) m.attachment = 'document';
         if (ca.re.gif.test(s)) m.attachment = 'gif';
+        if (ca.re.sticker.test(s)) m.attachment = 'sticker';
         if (ca.re.video.test(s)) m.attachment = 'video';
         if (ca.re.audio.test(s)) m.attachment = 'audio';
         if (ca.re.contact.test(s)) m.attachment = 'contact';
@@ -135,9 +159,10 @@ class Message {
       }
       //Handle words
       this.words = this.message.toLowerCase().split(ca.re.words);
-      //Strip emoji's from words
+      //Strip emoji's and special characters from words
       for (let wNr in this.words) {
         this.words[wNr] = this.words[wNr].replace(ca.re.emoji,'');
+        this.words[wNr] = this.words[wNr].replace(ca.re.words, '');
       }
       //Remove empty words
       this.words = this.words.filter(function (w) {
@@ -212,6 +237,12 @@ class Chat {
     if (m.message || m.attachment) this.messages.push(m);
     if (m.event) this.events.push(m);
   }
+  getStatistics() {
+    ca.log("Generating overall statistics for " + this.name + "...");
+    var cs = new ChatStatistics();
+    for (let m of this.messages) cs.addMessage(m);
+    return cs;
+  }
   getStatisticsPeriod(start, end) {
     var cs = new ChatStatistics();
     for (let m of this.messages) {
@@ -261,13 +292,13 @@ class Chat {
       default:
         title = "Statistics for period " + start.format("YYYY-MM-DD") + " - " + end.format("YYYY-MM-DD");
     }
+    ca.log("Generating statistics for period " + title + "...");
     var cs = this.getStatisticsPeriod(start, end);
     cs.periodDesc = title;
     return cs;
   }
 }
 
-// MessageCollection class
 class Statistics extends Chat {
   constructor(name) {
     super(name);
@@ -301,6 +332,8 @@ class Statistics extends Chat {
           word.name = w;
           word.count = 1
           word.isStopword = ca.isStopword(w);
+          word.firstUsedOn = m.timestamp;
+          word.firstUsedBy = m.user;
           this.words.push(word);
         } else {
           word.count++;
@@ -324,6 +357,22 @@ class Statistics extends Chat {
     return this.words.find(function(word) {
       return word.name == w;
     });
+  }
+  getNewWords(stats) {
+    ca.log("Finding new words for " + this.name + "...");
+    var newWords = [];
+    for (let word of this.words) {
+      let w = stats.getWord(word.name);
+      if (w) {
+        let t = moment(w.firstUsedOn);
+        if (t >= this.start && t <= this.end ) newWords.push(w);
+      } 
+    }
+    //Sort
+    newWords.sort(function(a,b) {
+      return (a.name < b.name) ? -1 : 1; 
+    });
+    return newWords;
   }
   //Get timeseries (for graphs)
   getMessageCountTimeSeries(unit) {
@@ -415,7 +464,6 @@ class Statistics extends Chat {
   }
 }
 
-// User class
 class UserStatistics extends Statistics {
   constructor(name) {
     super(name);
@@ -424,7 +472,6 @@ class UserStatistics extends Statistics {
   }
 }
 
-// Chat class
 class ChatStatistics extends Statistics {
   constructor() {
     super("Totals");
@@ -553,14 +600,15 @@ function readSingleFile(e) {
 
     var contents = e.target.result;
     ca.parseContent(contents);
-    var chatStats = ca.chat.getStatisticsPeriodByUnit('last', 1, 'month');
+    ca.chatStats = ca.chat.getStatistics();
+    ca.chatStatsPeriod = ca.chat.getStatisticsPeriodByUnit('last', 1, 'month');
     // create colors:
     backgroundColorArray = ["rgba(0, 157, 222, 0.4)", "rgba(255, 72, 64, 0.2)"];
     colorArray = ["rgb(20, 168, 204)", "rgb(255, 72, 64)"];
 
 
     // checks if group chat
-    if (chatStats.userCount > 0) {
+    if (ca.chatStatsPeriod.userCount > 0) {
       // GROUP CHAT ----------------------------------------------------------------------
 
       // TODO: What to do when this is a normal chat misidentified as a group chat?
@@ -577,11 +625,12 @@ function readSingleFile(e) {
 
 
       // analyze
-      displayGroupStats(chatStats);
+      displayGroupStats(ca.chatStatsPeriod);
       // Day Radar
-      createDayRadar(chatStats);
+      createDayRadar(ca.chatStatsPeriod);
       // Chronological Graph
-      createChronologicalGraph(chatStats);
+      createChronologicalGraph(ca.chatStatsPeriod);
+      displayNewWords(ca.chatStatsPeriod.getNewWords(ca.chatStats));
     } 
 
     // CLEAN HTML -------------------------------------------------------------------------
@@ -850,6 +899,16 @@ function createChronologicalGraph(chat) {
         }
       }
   );
+}
+
+function displayNewWords(words) {
+  var div = document.getElementById('newWords');
+  var html = '<h3>Number of new words used in this period: ' + words.length +'</h3><ul>';
+  for (let word of words) {
+    html += "<li>" + word.name + " - First used by " + word.firstUsedBy + " on " + word.firstUsedOn;
+  }
+  html += "</ul>";
+  div.innerHTML = html;
 }
 
 // OTHER -----------------------------------------------------------------------
